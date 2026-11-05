@@ -1,0 +1,161 @@
+generator client {
+  provider        = "prisma-client-js"
+  engineType      = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PrincipalKind {
+  GUEST
+  SERVICE
+}
+
+enum MediaKind {
+  VIDEO
+  AUDIO
+}
+
+enum MediaStatus {
+  READY
+  EXPIRED
+  FAILED
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+enum OutputFormat {
+  MP4
+  WEBM
+  MP3
+  WAV
+  AAC
+  FLAC
+}
+
+enum EventLevel {
+  INFO
+  WARN
+  ERROR
+}
+
+model User {
+  id         String          @id @default(uuid()) @db.Uuid
+  guestId    String          @unique
+  kind       PrincipalKind   @default(GUEST)
+  createdAt  DateTime        @default(now())
+  lastSeenAt DateTime        @default(now())
+  media      MediaFile[]
+  jobs       ConversionJob[]
+
+  @@index([lastSeenAt])
+}
+
+model MediaFile {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName     String
+  mimeType        String
+  container       String
+  sizeBytes       BigInt
+  durationSeconds Float?
+  width           Int?
+  height          Int?
+  frameRate       String?
+  videoCodec      String?
+  audioCodec      String?
+  hasVideo        Boolean         @default(false)
+  hasAudio        Boolean         @default(false)
+  kind            MediaKind
+  sha256          String
+  sourceKey       String          @unique
+  thumbnailKey    String?
+  thumbnailMime   String?
+  previewKey      String?
+  previewMime     String?
+  sourceDomain    String?
+  status          MediaStatus     @default(READY)
+  expiresAt       DateTime
+  createdAt       DateTime        @default(now())
+  jobs            ConversionJob[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
+  @@index([expiresAt])
+}
+
+model ConversionJob {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @db.Uuid
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mediaId           String             @db.Uuid
+  media             MediaFile          @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  batchId           String             @db.Uuid
+  targetFormat      OutputFormat
+  presetLabel       String
+  videoPreset       String?
+  videoQuality      String?
+  videoHeight       Int?
+  videoBitrateKbps  Int?
+  audioBitrateKbps  Int?
+  status            JobStatus          @default(QUEUED)
+  progress          Float              @default(0)
+  stage             String?
+  errorCode         String?
+  errorMessage      String?
+  attempts          Int                @default(0)
+  workerId          String?
+  queueJobId        String?            @unique
+  startedAt         DateTime?
+  completedAt       DateTime?
+  canceledAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  outputs           ConversionOutput[]
+  events            ProcessingEvent[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([batchId])
+  @@index([status, createdAt])
+  @@index([mediaId])
+}
+
+model ConversionOutput {
+  id              String        @id @default(uuid()) @db.Uuid
+  jobId           String        @db.Uuid
+  job             ConversionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  fileName        String
+  mimeType        String
+  objectKey       String        @unique
+  sizeBytes       BigInt
+  sha256          String
+  durationSeconds Float?
+  expiresAt       DateTime
+  downloadCount   Int           @default(0)
+  createdAt       DateTime      @default(now())
+
+  @@index([jobId])
+  @@index([expiresAt])
+}
+
+model ProcessingEvent {
+  id        BigInt        @id @default(autoincrement()) @db.BigInt
+  jobId     String        @db.Uuid
+  job       ConversionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  level     EventLevel    @default(INFO)
+  stage     String
+  message   String
+  progress  Float?
+  createdAt DateTime      @default(now())
+
+  @@index([jobId, createdAt])
+}

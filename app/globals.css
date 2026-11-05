@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: 247 246 242;
+  --surface: 255 255 255;
+  --surface-2: 240 239 233;
+  --ink: 17 25 38;
+  --muted: 91 103 120;
+  --line: 219 221 216;
+  --brand: 222 65 55;
+  --brand-soft: 255 234 229;
+  --teal: 13 121 132;
+  --gold: 190 130 35;
+  --success: 21 128 82;
+  --danger: 184 43 48;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --canvas: 8 13 23;
+    --surface: 15 23 37;
+    --surface-2: 21 31 48;
+    --ink: 237 243 250;
+    --muted: 151 166 185;
+    --line: 41 55 76;
+    --brand: 255 111 96;
+    --brand-soft: 69 30 30;
+    --teal: 65 197 204;
+    --gold: 236 186 87;
+    --success: 74 207 139;
+    --danger: 248 113 113;
+    color-scheme: dark;
+  }
+}
+
+:root.dark {
+  --canvas: 8 13 23;
+  --surface: 15 23 37;
+  --surface-2: 21 31 48;
+  --ink: 237 243 250;
+  --muted: 151 166 185;
+  --line: 41 55 76;
+  --brand: 255 111 96;
+  --brand-soft: 69 30 30;
+  --teal: 65 197 204;
+  --gold: 236 186 87;
+  --success: 74 207 139;
+  --danger: 248 113 113;
+  color-scheme: dark;
+}
+
+:root.light {
+  color-scheme: light;
+}
+
+* {
+  border-color: rgb(var(--line));
+}
+
+html {
+  scroll-behavior: smooth;
+  background: rgb(var(--canvas));
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% -5%, rgb(var(--brand) / 0.10), transparent 30rem),
+    radial-gradient(circle at 95% 12%, rgb(var(--teal) / 0.10), transparent 28rem),
+    rgb(var(--canvas));
+  color: rgb(var(--ink));
+  font-family: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(var(--brand) / 0.22);
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--brand));
+  outline-offset: 3px;
+}
+
+@layer components {
+  .container-shell {
+    @apply mx-auto w-full max-w-[1220px] px-5 sm:px-8 lg:px-10;
+  }
+
+  .glass-panel {
+    @apply border border-line/80 bg-surface/80 backdrop-blur-xl;
+  }
+
+  .hairline {
+    @apply border border-line/80;
+  }
+
+  .display-type {
+    @apply font-display tracking-[-0.035em];
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.22em] text-muted;
+  }
+
+  .prose-legal {
+    @apply text-[15px] leading-7 text-muted;
+  }
+
+  .prose-legal h2 {
+    @apply mb-3 mt-10 font-display text-2xl font-medium tracking-tight text-ink;
+  }
+
+  .prose-legal h3 {
+    @apply mb-2 mt-7 text-base font-semibold text-ink;
+  }
+
+  .prose-legal p {
+    @apply mb-4;
+  }
+
+  .prose-legal ul {
+    @apply mb-5 list-disc space-y-2 pl-5;
+  }
+
+  .prose-legal strong {
+    @apply font-semibold text-ink;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, rgb(var(--ink)) 10%, rgb(var(--brand)) 58%, rgb(var(--teal)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .ambient-grid {
+    background-image:
+      linear-gradient(rgb(var(--line) / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--line) / 0.35) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, black, transparent 80%);
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-surface-2;
+  }
+
+  .skeleton::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(var(--surface) / 0.7), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
